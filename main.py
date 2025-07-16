@@ -28,6 +28,15 @@ def signupPage():
 def shopPage():
     return render_template("shop.html")
 
+#route giao tiếp với client
+@app.route("/contact")
+def contactusPage():
+    return render_template("contactus.html")
+
+@app.route("/about")
+def aboutPage():
+    return render_template("about.html")
+
 
 
 # Chỉ mở trình duyệt nếu đây là tiến trình chính (tránh auto-reload)
