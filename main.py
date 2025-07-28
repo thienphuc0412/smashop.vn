@@ -37,6 +37,10 @@ def contactusPage():
 def aboutPage():
     return render_template("about.html")
 
+@app.route("/cart")
+def cartPage():
+    return render_template("cart.html")
+
 
 
 # Chỉ mở trình duyệt nếu đây là tiến trình chính (tránh auto-reload)
