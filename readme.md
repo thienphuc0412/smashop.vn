@@ -44,14 +44,18 @@ SmaShop là một dự án web thương mại điện tử được xây dựng 
   ```
 
 ### Backend
-- **Server Environment:** XAMPP (Apache + MySQL + PHP)
-- **Database:** MySQL
-  - Schemas được định nghĩa trước
-  - Dữ liệu demo có sẵn
+- **Framework:** Flask (Python)
+- **Database:** MongoDB
+  - Local MongoDB server
+  - Database name: smashop
+  - Collections: users, counters (auto-increment)
 - **API Communication:** XMLHttpRequest (XHR)
+- **Authentication:** Flask-Login
 
 ### Development Tools
-- **Local Development:** XAMPP
+- **Local Development:** 
+  - Python 3.x
+  - MongoDB Community Server
 - **Version Control:** Git
 
 ## 📋 Kế Hoạch Phát Triển
@@ -78,51 +82,61 @@ SmaShop là một dự án web thương mại điện tử được xây dựng 
 3. Documentation
 4. Deployment
 
-## 🔄 Database Schema (Cơ bản)
+## 🔄 Database Schema (MongoDB Collections)
 
-```sql
--- Users Table
-CREATE TABLE users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE,
-    password VARCHAR(255),
-    email VARCHAR(100) UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+### Users Collection
+```javascript
+{
+  "user_id": "001",          // Auto-incrementing ID (format: 001, 002, etc.)
+  "username": "user123",     // Unique username
+  "password": "hashed_pwd",  // Hashed password
+  "email": "user@example.com", // Unique email
+  "created_at": ISODate("2025-08-08T10:00:00Z")
+}
+```
 
--- Shops Table
-CREATE TABLE shops (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    shop_name VARCHAR(100),
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
+### Counters Collection (For Auto-increment)
+```javascript
+{
+  "_id": "user_id",
+  "sequence_value": 1
+}
+```
 
--- Products Table
-CREATE TABLE products (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    shop_id INT,
-    name VARCHAR(200),
-    price DECIMAL(10,2),
-    description TEXT,
-    stock INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (shop_id) REFERENCES shops(id)
-);
+### Shops Collection (Planned)
+```javascript
+{
+  "shop_id": "001",
+  "owner_id": "001",        // Reference to user_id
+  "shop_name": "Shop Name",
+  "description": "Shop description",
+  "created_at": ISODate("2025-08-08T10:00:00Z")
+}
+```
 
--- Orders Table
-CREATE TABLE orders (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    buyer_id INT,
-    shop_id INT,
-    status ENUM('pending', 'processing', 'shipping', 'completed'),
-    total_amount DECIMAL(10,2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (buyer_id) REFERENCES users(id),
-    FOREIGN KEY (shop_id) REFERENCES shops(id)
-);
+### Products Collection (Planned)
+```javascript
+{
+  "product_id": "001",
+  "shop_id": "001",         // Reference to shop_id
+  "name": "Product Name",
+  "price": 99.99,
+  "description": "Product description",
+  "stock": 100,
+  "created_at": ISODate("2025-08-08T10:00:00Z")
+}
+```
+
+### Orders Collection (Planned)
+```javascript
+{
+  "order_id": "001",
+  "buyer_id": "001",        // Reference to user_id
+  "shop_id": "001",         // Reference to shop_id
+  "status": "pending",      // enum: ["pending", "processing", "shipping", "completed"]
+  "total_amount": 99.99,
+  "created_at": ISODate("2025-08-08T10:00:00Z")
+}
 ```
 
 ## 📈 Kế Hoạch Mở Rộng (Future Features)
