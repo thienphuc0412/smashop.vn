@@ -131,17 +131,22 @@
 
                 <div class="login-form">
                     <form action="#" method="POST">
-                        <!-- Email Input -->
+                        <!-- Username Input -->
                         <div class="form-floating">
-                            <input type="email" class="form-control" id="email" placeholder="name@example.com" required>
-                            <label for="email">Email</label>
+                            <input type="text" class="form-control" id="username" 
+                                   placeholder="Tên tài khoản" required
+                                   pattern="[a-zA-Z0-9_]{5,20}">
+                            <label for="username">Tên tài khoản</label>
                         </div>
+                        <div class="invalid-feedback" id="username-error"></div>
 
                         <!-- Password Input -->
                         <div class="form-floating">
-                            <input type="password" class="form-control" id="password" placeholder="Mật khẩu" required>
+                            <input type="password" class="form-control" id="password" 
+                                   placeholder="Mật khẩu" required>
                             <label for="password">Mật khẩu</label>
                         </div>
+                        <div class="invalid-feedback" id="password-error"></div>
 
                         <!-- Remember Me & Forgot Password -->
                         <div class="d-flex justify-content-between mb-3">
@@ -194,5 +199,141 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Login Script -->
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Reset previous error states
+            document.getElementById('username').classList.remove('is-invalid');
+            document.getElementById('password').classList.remove('is-invalid');
+            
+            // Get form data
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Add loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang đăng nhập...';
+            
+            // Tạo XMLHttpRequest
+            const xhr = new XMLHttpRequest();
+            
+            // Thiết lập timeout cho request (5 giây)
+            xhr.timeout = 5000;
+            
+            // Mở kết nối
+            xhr.open('POST', '/api/login', true);
+            
+            // Thiết lập header
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            // Xử lý response
+            xhr.onload = function() {
+                const data = JSON.parse(xhr.responseText);
+                
+                if (xhr.status === 200) {
+                    // Login successful
+                    showToast('Thành công', data.message, 'success');
+                    
+                    // Check if there's a return URL in query params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('next') || '/';
+                    
+                    // Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = returnUrl;
+                    }, 1000);
+                } else {
+                    // Login failed
+                    if (data.message.includes('Tên đăng nhập')) {
+                        document.getElementById('username').classList.add('is-invalid');
+                        document.getElementById('username-error').textContent = data.message;
+                    } else if (data.message.includes('mật khẩu')) {
+                        document.getElementById('password').classList.add('is-invalid');
+                        document.getElementById('password-error').textContent = data.message;
+                    } else {
+                        showToast('Lỗi', data.message, 'error');
+                    }
+                }
+                
+                // Restore button state
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            };
+            
+            // Xử lý lỗi network
+            xhr.onerror = function() {
+                console.error('Network Error');
+                showToast('Lỗi', 'Không thể kết nối đến server', 'error');
+                
+                // Restore button state
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            };
+            
+            // Xử lý timeout
+            xhr.ontimeout = function() {
+                console.error('Request timed out');
+                showToast('Lỗi', 'Request timed out - Vui lòng thử lại', 'error');
+                
+                // Restore button state
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            };
+            
+            // Gửi request
+            xhr.send(JSON.stringify({
+                username: username,
+                password: password
+            }));
+        });
+
+        // Toast notification system
+        function showToast(title, message, type = 'info') {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <strong>${title}</strong><br>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+
+            // Add to container
+            toastContainer.appendChild(toast);
+
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Remove after hiding
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+    </script>
+
+    <!-- Add toast container for notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3"></div>
 </body>
 </html>

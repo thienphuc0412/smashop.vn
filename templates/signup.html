@@ -252,17 +252,75 @@
         document.getElementById('signupForm').addEventListener('submit', function(event) {
             event.preventDefault();
             
-            // Kiểm tra mật khẩu trùng khớp
+            // Lấy giá trị từ form
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const email = document.getElementById('email').value;
             
+            // Kiểm tra mật khẩu trùng khớp
             if (password !== confirmPassword) {
                 alert('Mật khẩu nhập lại không khớp!');
                 return;
             }
+
+            // Tạo object data để gửi lên server
+            const data = {
+                username: username,
+                password: password,
+                email: email
+            };
+
+            // Tạo XMLHttpRequest
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/signup', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');// mã hóa dữ liệu gửi đi
+
+            // Xử lý response
+            xhr.onload = function() {
+                const response = JSON.parse(xhr.responseText);
+                if (xhr.status === 200) {
+                    // Đăng ký thành công
+                    alert(response.message);
+                    // Chuyển hướng về trang đăng nhập
+                    window.location.href = '/login';
+                } else {
+                    // Đăng ký thất bại
+                    alert(response.message || 'Có lỗi xảy ra khi đăng ký');
+                }
+            };
+
+            // Xử lý lỗi network
+            xhr.onerror = function() {
+                alert('Lỗi kết nối đến server');
+            };
+
+            // Gửi request
+            xhr.send(JSON.stringify(data));
+        });
+
+        // Hiển thị feedback cho password match
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
             
-            // Thêm code xử lý đăng ký ở đây
-            console.log('Form submitted successfully');
+            if (password !== confirmPassword) {
+                this.setCustomValidity('Mật khẩu không khớp');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Cập nhật validation khi password thay đổi
+        document.getElementById('password').addEventListener('input', function() {
+            const confirmPassword = document.getElementById('confirmPassword');
+            if (confirmPassword.value) {
+                if (this.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity('Mật khẩu không khớp');
+                } else {
+                    confirmPassword.setCustomValidity('');
+                }
+            }
         });
     </script>
 </body>
