@@ -1,36 +1,36 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Hiển thị trạng thái git
+:: Display git status
 echo ===== Git Status =====
 git status
 echo ====================
 echo.
 
-:: Yêu cầu nhập tin nhắn commit
-set /p commit_msg="Nhập tin nhắn commit: "
+:: Request commit message
+set /p commit_msg="Enter commit message: "
 
-:: Kiểm tra xem người dùng có nhập tin nhắn không
+:: Check if commit message is empty
 if "!commit_msg!"=="" (
-    echo Lỗi: Tin nhắn commit không được để trống!
+    echo Error: Commit message cannot be empty!
     pause
     exit /b 1
 )
 
-:: Thực hiện các lệnh git
+:: Execute git commands
 echo.
-echo Đang thêm các file...
+echo Adding files...
 git add .
 
 echo.
-echo Đang commit với tin nhắn: "!commit_msg!"
+echo Committing with message: "!commit_msg!"
 git commit -m "!commit_msg!"
 
 echo.
-echo Đang push lên remote...
+echo Pushing to remote...
 git push origin master
 
 echo.
-echo ===== Hoàn thành =====
-echo Đã push lên git thành công!
+echo ===== Complete =====
+echo Successfully pushed to git!
 pause
